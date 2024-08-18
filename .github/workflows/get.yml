@@ -1,0 +1,26 @@
+name: Update repo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update_repo:
+    runs-on: macos-13
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get files
+        run: |
+          curl -LO https://get.localhost.direct/localhost.direct.zip
+          unzip -o -P localhost localhost.direct.zip
+          openssl pkcs12 -export -out localhost.direct.pfx -inkey localhost.direct.key -in localhost.direct.crt -passout pass:
+          rm localhost.direct.zip localhost.direct.crt localhost.direct.key
+
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          default_author: github_actions
+          message: "chore: update certificate"
+          add: localhost.direct.pfx
